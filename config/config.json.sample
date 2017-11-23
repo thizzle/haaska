@@ -1,6 +1,7 @@
 {
   "url": "http://localhost:8123/api",
   "password": "",
+  "timeout": 0,
   "ssl_verify": false,
   "expose_by_default": true,
   "exposed_domains": [

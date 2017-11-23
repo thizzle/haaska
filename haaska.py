@@ -60,18 +60,17 @@ class HomeAssistant(object):
         return r.json()
 
     def post(self, relurl, d, wait=False):
-        read_timeout = None if wait else 0.01
         r = None
         try:
             logger.debug('calling %s with %s', relurl, str(d))
             r = self.session.post(self.build_url(relurl),
                                   data=json.dumps(d),
-                                  timeout=(None, read_timeout))
+                                  timeout=(None, self.config.read_timeout))
             r.raise_for_status()
         except requests.exceptions.ReadTimeout:
             # Allow response timeouts after request was sent
-            logger.debug('request for %s sent without waiting for response',
-                         relurl)
+            logger.debug('request for %s timed out after %d seconds',
+                         relurl, self.config.read_timeout)
         return r
 
 
@@ -624,6 +623,7 @@ class Configuration(object):
                                default='http://localhost:8123/api')
         opts['ssl_verify'] = self.get(['ssl_verify', 'ha_cert'], default=True)
         opts['password'] = self.get(['password', 'ha_passwd'], default='')
+        opts['read_timeout'] = self.get(['timeout'], None)
         opts['exposed_domains'] = \
             sorted(self.get(['exposed_domains', 'ha_allowed_entities'],
                             default=DOMAINS.keys()))
